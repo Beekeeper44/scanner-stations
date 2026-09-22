@@ -1,0 +1,1247 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Arena Club Admin — Prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --nav-bg:#000;--nav-active:#5fd35a;--purple:#8b5cf6;--pill-purple:#7e4fc4;--start-green:#4a7c3f;
+  --red:#e8352b;--green:#4cc03f;--blue:#1565d8;--log-bg:#d5f6fc;
+  --page:#fff;--ink:#111318;--muted:#5f6772;--line:#e0e0e0;
+  box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px);-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--page);color:var(--ink);font-family:Inter,"Helvetica Neue",Arial,sans-serif;font-size:16px;line-height:1.45}
+button{font:inherit;cursor:pointer}
+:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+/* nav */
+.nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:50;background:var(--nav-bg);color:#fff;display:flex;align-items:center;gap:6px;padding:10px 18px}
+.logo{width:38px;height:38px;flex:none;border:2px solid #fff;border-radius:4px;display:grid;place-content:center;line-height:.95;text-align:center;font-size:7px;font-weight:800;letter-spacing:.04em;background:none;color:#fff;padding:0}
+.logo span{display:block;font-size:5px;font-weight:600}
+.navlinks{display:flex;align-items:center;gap:2px;flex:1;min-width:0;overflow-x:auto;scrollbar-width:none}
+.navlinks::-webkit-scrollbar{display:none}
+.navbtn{background:none;border:0;color:#fff;font-weight:700;font-size:15px;padding:10px 12px;border-radius:6px;white-space:nowrap}
+.navbtn:hover{background:#1c1c1c}
+.navbtn.dim{color:#7a7f87;cursor:default}
+.navbtn.dim:hover{background:none}
+.menu button.dim{color:#a8adb5;cursor:default}
+.menu button.dim:hover{background:none}
+.navbtn.on{color:var(--nav-active)}
+.navright{display:flex;align-items:center;gap:12px;flex:none;padding-left:10px}
+.me{display:flex;align-items:center;gap:12px;background:none;border:0;padding:5px 9px;border-radius:8px;color:#fff}
+.me:hover{background:#1c1c1c}
+.avatar{width:30px;height:30px;border-radius:50%;flex:none;background-image:radial-gradient(circle at 30% 30%,#c79a63,#5e3f24)}
+.who{font-weight:700;font-size:15px}
+.points{font-weight:600;font-size:15px;color:#e8e8e8}
+.pillbtn{border:0;border-radius:7px;padding:9px 14px;font-weight:700;color:#fff;font-size:14px}
+.pillbtn.logout{background:var(--purple)}
+.pillbtn.start{background:var(--start-green)}
+.pillbtn.start.on{background:#b02a20}
+@media (max-width:980px){.who,.points{display:none}}
+.menuwrap{position:relative}
+.menu{position:fixed;top:0;left:0;min-width:262px;background:#fff;border-radius:10px;box-shadow:0 10px 34px rgba(0,0,0,.28);padding:6px 0;display:none;z-index:120}
+.menu.open{display:block}
+.menu button{display:block;width:100%;text-align:left;background:none;border:0;padding:12px 22px;font-size:16px;color:#1a1a1a;font-weight:500}
+.menu button:hover,.menu button.sel{background:#e3e3e3}
+
+/* shell */
+main{min-height:70vh;padding:22px 26px 90px}
+h1.left{font-size:clamp(30px,3.4vw,42px);font-weight:900;letter-spacing:-.02em;margin:8px 0 22px}
+h1.mid{font-size:clamp(34px,5vw,54px);font-weight:900;letter-spacing:-.02em;text-align:center;margin:18px 0 22px}
+h2.sec{font-size:18px;font-weight:800;margin:28px 0 12px}
+p.note{color:var(--muted);font-size:14px}
+.home{padding:34px 0 0 clamp(0px,11vw,290px)}
+.home h2{margin:0;font-size:17px;font-weight:800;color:#3b4250}
+.empty{padding:34px;text-align:center;color:var(--muted);border:1px dashed #c9ced6;border-radius:8px;margin:18px 0}
+
+/* mui tabs */
+.muitabs{display:flex;gap:26px;border-bottom:1px solid var(--line);margin-bottom:22px;overflow-x:auto;scrollbar-width:none}
+.muitabs::-webkit-scrollbar{display:none}
+.muitab{background:none;border:0;border-bottom:2px solid transparent;margin-bottom:-1px;padding:14px 4px;font-size:15px;font-weight:600;letter-spacing:.04em;color:var(--muted);display:flex;align-items:center;gap:9px;white-space:nowrap;text-transform:uppercase}
+.muitab.on{color:var(--blue);border-bottom-color:var(--blue)}
+.badge{background:#d8dce2;color:#22262c;border-radius:20px;font-size:12px;font-weight:700;padding:2px 9px;letter-spacing:0}
+.muitab.on .badge{background:var(--blue);color:#fff}
+
+/* filters */
+.filters{display:flex;gap:18px;align-items:center;flex-wrap:wrap;margin-bottom:20px}
+.mui{position:relative;flex:1 1 260px;min-width:210px}
+.mui>label{position:absolute;top:-8px;left:11px;background:#fff;padding:0 5px;font-size:12px;color:#6b7280}
+.mui select,.mui input{width:100%;padding:17px 13px;font-size:16px;border:1px solid #c4c9d0;border-radius:5px;background:#fff;color:var(--ink);appearance:none}
+.mui select{color:#44484f;font-style:italic;background-image:linear-gradient(45deg,transparent 50%,#555 50%),linear-gradient(135deg,#555 50%,transparent 50%);background-position:calc(100% - 20px) 24px,calc(100% - 14px) 24px;background-size:6px 6px,6px 6px;background-repeat:no-repeat}
+.mui input::placeholder{color:#6b7280}
+.btn-search{background:var(--blue);color:#fff;border:0;border-radius:5px;padding:14px 26px;font-weight:700;letter-spacing:.06em;font-size:14px}
+.btn-clear{background:none;border:0;color:#a0a6ae;font-weight:700;letter-spacing:.06em;font-size:14px;padding:14px 18px;border-radius:5px}
+.btn-clear:hover{color:var(--muted);background:#f3f5f7}
+
+/* data table */
+.tablewrap{overflow-x:auto}
+table.dt{width:100%;min-width:1000px;border-collapse:collapse}
+table.dt th{background:#fff;border-bottom:1px solid var(--line);padding:16px 12px;font-size:15px;font-weight:800;text-align:left;white-space:nowrap}
+table.dt td{border-bottom:1px solid #eceef1;padding:13px 12px;font-size:15px;vertical-align:middle}
+table.dt tbody tr:hover{background:#f6f7f8}
+.boxbtn{border:1px solid #bcd3f5;background:#fff;color:var(--blue);border-radius:5px;padding:9px 13px;font-weight:600;font-size:14px;white-space:nowrap}
+.boxbtn:hover{background:#eef4ff}
+.olink{color:var(--blue);font-weight:500;background:none;border:0;padding:0;font-size:15px;text-align:left}
+.olink:hover{text-decoration:underline}
+.datechip{display:inline-flex;align-items:center;gap:9px;border:1px solid #e0b4b0;color:#c0392b;border-radius:5px;padding:9px 13px;font-weight:600;font-size:14px;white-space:nowrap}
+.datechip.fine{border-color:#c4c9d0;color:#3a3f46}
+.overdue{display:inline-block;background:#c0392b;color:#fff;border-radius:20px;padding:6px 13px;font-weight:700;font-size:13px;margin-left:10px;white-space:nowrap}
+.actbtn{background:#3fa64a;color:#fff;border:0;border-radius:20px;padding:8px 20px;font-weight:700;font-size:14px;white-space:nowrap}
+.actbtn:hover{background:#358c3f}
+.actbtn.blue{background:var(--blue)}.actbtn.blue:hover{background:#0f4fae}
+.actbtn.grey{background:#41464e}.actbtn.grey:hover{background:#2b2f35}
+.tag{display:inline-block;padding:4px 11px;border-radius:20px;font-size:13px;font-weight:700;white-space:nowrap}
+.tag.ok{background:#dcf5e3;color:#14562f}
+.tag.warn{background:#fdecc8;color:#6a4900}
+.tag.err{background:#fadad7;color:#7a1c14}
+.tag.info{background:#dce8fb;color:#123a77}
+.tag.grey{background:#e7e9ec;color:#3a3f46}
+
+/* graders */
+.field{position:relative;margin:0 auto 26px;max-width:800px}
+.field input{width:100%;padding:20px 14px;font-size:16px;border:2px solid var(--blue);border-radius:6px;background:#fff;color:var(--ink)}
+.field label{position:absolute;top:-9px;left:12px;background:#fff;padding:0 6px;font-size:13px;color:var(--blue)}
+.gtable{max-width:820px;margin:0 auto;border-top:1px solid var(--line)}
+.ghead{display:grid;grid-template-columns:1.35fr .9fr;gap:10px;padding:14px 8px;border-bottom:1px solid var(--line);font-weight:800}
+.grow{display:grid;grid-template-columns:1.35fr .9fr;gap:10px;align-items:center;border-bottom:1px solid var(--line)}
+.gpill{display:flex;align-items:center;gap:12px;background:var(--pill-purple);color:#111;border:0;border-radius:26px;padding:12px 18px;margin:7px 0;width:100%;text-align:left}
+.gpill:hover{filter:brightness(1.07)}
+.gpill .ini{width:38px;height:38px;border-radius:50%;background:#cfe6cd;display:grid;place-content:center;font-weight:800;font-size:13px;flex:none}
+.gpill b{display:block;font-size:16px;font-weight:800;line-height:1.2}
+.gpill small{font-size:14px;color:#2f2f35;opacity:.85}
+.gdate{font-size:15px;padding-left:6px}
+@media (max-width:640px){.ghead,.grow{grid-template-columns:1fr}.ghead span:last-child{display:none}.gdate{padding:0 0 10px 18px;font-size:13px}}
+.skills{display:grid;grid-template-columns:repeat(auto-fill,minmax(152px,1fr));gap:9px}
+.skill{border:0;border-radius:8px;padding:14px 12px;min-height:68px;font-weight:800;font-size:15px;text-align:left;line-height:1.2;display:flex;align-items:flex-start}
+.skill.off{background:var(--red);color:#fff}
+.skill.on{background:var(--green);color:#10240d}
+.skill:hover{filter:brightness(1.06)}
+.skill.flag{box-shadow:inset 0 0 0 3px #111}
+.legend{display:flex;gap:16px;align-items:center;justify-content:center;flex-wrap:wrap;margin:0 0 18px;font-size:14px;color:var(--muted)}
+.dot{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+.log{background:var(--log-bg);border-radius:6px;padding:20px 22px;margin-top:26px}
+.log .item{padding:10px 0 16px}
+.log .item+.item{border-top:1px solid rgba(0,0,0,.08)}
+.log h3{margin:0 0 6px;font-size:19px;font-weight:800}
+.log .bullet{margin:0 0 4px;font-weight:700;font-size:15px;word-break:break-all}
+.log .ts{margin:0;font-size:13px;font-weight:600;color:#1d2b2f}
+
+/* hardware table + stations */
+.segmented{display:inline-flex;border:1px solid var(--line);border-radius:7px;overflow:hidden;margin-bottom:20px}
+.segmented button{background:#fff;border:0;padding:10px 18px;font-weight:700;font-size:14px;color:var(--muted)}
+.segmented button+button{border-left:1px solid var(--line)}
+.segmented button.on{background:#111;color:#fff}
+.btn-out{border:1px solid #c4c9d0;background:#fff;color:#2b2f35;border-radius:6px;padding:8px 14px;font-weight:600;font-size:14px;margin-right:8px}
+.btn-out:hover{background:#f3f5f7}
+.btn-out.red{border-color:#e8a19b;color:#c0392b}
+.btn-out.red:hover{background:#fdf1f0}
+.btn-out.green{border-color:#9fd3a4;color:#2b7a3d}
+.btn-out.green:hover{background:#f0faf1}
+.btn-add{border:1px solid #9fd3a4;background:#fff;color:#2b7a3d;border-radius:6px;padding:13px 20px;font-weight:700;font-size:14px}
+.btn-add:hover{background:#f0faf1}
+.overlay{position:fixed;inset:0;background:rgba(10,12,16,.45);display:grid;place-items:center;z-index:120;padding:20px}
+.sheet{background:#fff;border-radius:12px;padding:24px;width:min(520px,100%);box-shadow:0 20px 60px rgba(0,0,0,.35)}
+.sheet h3{margin:0 0 20px;font-size:20px;font-weight:800}
+.sheetbar{display:flex;justify-content:flex-end;gap:10px;margin-top:24px}
+.sheetbar .btn-out{margin:0}
+.stations{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:18px}
+.stcard{background:#fff;border:1px solid #e6e8ec;border-radius:12px;padding:14px 14px 16px;box-shadow:0 2px 10px rgba(16,20,28,.06)}
+.stcard h4{margin:0 0 12px;font-size:19px;font-weight:800;text-align:center}
+.stcard{position:relative}
+.stcard[data-card]{cursor:pointer}
+.delst{position:absolute;top:8px;right:8px;background:none;border:0;font-size:20px;line-height:1;color:#b9bec6;padding:2px 6px;border-radius:6px}
+.delst:hover{color:#c0392b;background:#fdf1f0}
+.stcard[data-card]:hover{border-color:#c9ced6}
+.disclose{width:100%;display:flex;justify-content:space-between;align-items:center;gap:8px;background:none;border:0;padding:6px 2px 0;font-size:13px;color:var(--muted);font-weight:600}
+.disclose:hover{color:var(--ink)}
+.disclose i{font-style:normal;font-size:12px}
+.stlist{margin-top:10px}
+.stlist .strow{cursor:default}
+.picker{max-height:50vh;overflow:auto;display:flex;flex-direction:column;gap:8px}
+.prow{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:#fff;color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:10px 14px}
+.prow:hover{border-color:#111;background:#f7f8f9}
+.prow .ini{width:34px;height:34px;border-radius:50%;background:#e7e9ec;display:grid;place-content:center;font-weight:800;font-size:13px;flex:none}
+.prow b{display:block;font-size:16px;font-weight:700;color:var(--ink)}
+.prow small{font-size:13px;color:var(--muted)}
+.prow span:nth-child(2){flex:1;min-width:0}
+.prow em{font-style:normal;font-size:12px;font-weight:700;color:var(--muted);white-space:nowrap}
+.prow em.go{color:#2b7a3d}
+.prow.taken{opacity:.5;cursor:not-allowed;background:#fafbfc}
+.prow.taken:hover{border-color:var(--line);background:#fafbfc}
+.stdetail .lbl{margin:16px 0 8px;font-size:12px;font-weight:800;color:var(--muted);letter-spacing:.04em}
+.stdetail .lbl:first-child{margin-top:0}
+.stdetail .val{margin:0;font-size:16px;font-weight:700}
+.stdetail .val span{font-weight:500;font-size:14px;color:var(--muted)}
+.stdetail .val.muted{font-weight:500;color:var(--muted)}
+.stdetail .strow{cursor:default;display:flex;justify-content:space-between;align-items:center}
+.stdetail .strow em{font-style:normal;font-size:12px;font-weight:600;opacity:.7}
+.strow{border-radius:8px;padding:10px 12px;margin-bottom:9px;text-align:center;font-weight:600;font-size:15px;border:1px solid;cursor:pointer}
+.strow.t-v600{background:#eef4ff;border-color:#c5d8f7;color:#1b4b9c}
+.strow.t-fuji{background:#fbf1de;border-color:#e6cfa3;color:#7a5a1d}
+.strow.live{background:#eaf7ee;border-color:#b6dfc2;color:#1c6334}
+.strow.printer{background:#fff;border-color:#dfe3e8;color:#3a3f46}
+.strow.slot{background:#fff;border:1px dashed #c4c9d0;color:#98a0aa;font-weight:600}
+.strow.slot:hover{border-color:#1565d8;color:#1565d8;background:#f5f9ff}
+.strow:hover{filter:brightness(.98)}
+.stnote{text-align:center;color:var(--muted);font-size:13px;margin:0 0 9px}
+.poolhint{font-size:14px;color:var(--muted);margin:0 0 16px}
+.poolhint b{color:var(--ink)}
+.dnd{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:22px;align-items:start}
+@media (max-width:900px){.dnd{grid-template-columns:1fr}}
+.dndright{border:1px solid var(--line);border-radius:12px;padding:18px;background:#fbfcfd;position:sticky;top:96px}
+.shelfhead{margin:0 0 12px;font-size:15px;font-weight:800;display:flex;justify-content:space-between;align-items:center}
+.shelfhead span{background:#d8dce2;border-radius:20px;padding:2px 10px;font-size:12px}
+.shelf{max-height:52vh;overflow:auto}
+.shelf .strow{margin-bottom:8px}
+.strow[draggable]{cursor:grab}
+.strow.dragging{opacity:.4}
+.strow.sel{box-shadow:0 0 0 3px #111}
+.stcard.drop.over,.dndright.over{outline:3px solid var(--blue);outline-offset:3px}
+.stmeta{margin:6px 2px 0;font-size:13px;color:var(--muted)}
+.stmail{margin:-4px 2px 10px;font-size:13px;color:var(--muted);text-align:center}
+.strow .x{margin-left:8px;opacity:.55;font-weight:800}
+.pool{display:flex;flex-wrap:wrap;gap:9px;padding:14px;border:1px solid var(--line);border-radius:10px;background:#fbfcfd;margin-bottom:6px}
+.chip{border:1px solid;border-radius:8px;padding:9px 13px;font-weight:700;font-size:15px;display:flex;align-items:center;gap:9px;background:#fff}
+.chip em{font-style:normal;font-weight:600;font-size:12px;opacity:.7}
+.chip.t-v600{border-color:#c5d8f7;color:#1b4b9c;background:#eef4ff}
+.chip.t-fuji{border-color:#e6cfa3;color:#7a5a1d;background:#fbf1de}
+.chip.t-printer{border-color:#dfe3e8;color:#3a3f46;background:#fff}
+.chip.placed{opacity:.6}
+.chip.sel{box-shadow:0 0 0 3px #111;opacity:1}
+.hw{display:grid;grid-template-columns:280px 1fr;gap:22px}
+@media (max-width:820px){.hw{grid-template-columns:1fr}}
+.devlist{display:flex;flex-direction:column;gap:8px}
+.dev{border:1px solid var(--line);border-radius:8px;padding:13px 15px;background:#fff;text-align:left;font-weight:700}
+.dev.on{border-color:#111;box-shadow:inset 3px 0 0 #3fa64a}
+.dev small{display:block;font-weight:600;font-size:12px;color:var(--muted);margin-top:2px}
+.panel{border:1px solid var(--line);border-radius:8px;padding:22px}
+.rowset{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:16px;margin-bottom:18px}
+.progress{height:10px;border-radius:6px;background:#eceff3;overflow:hidden;margin:16px 0 6px}
+.progress i{display:block;height:100%;width:0;background:#3fa64a;transition:width .2s linear}
+.lockcard{border:2px solid var(--red);border-radius:10px;padding:28px;max-width:680px;margin:24px auto;text-align:center}
+.lockcard h2{margin:0 0 10px;font-size:22px;font-weight:800}
+.lockcard p{color:var(--muted);margin:0 0 18px}
+.formgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:22px 18px;max-width:900px}
+.checks{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;max-width:900px;margin-bottom:22px}
+.check{display:flex;gap:9px;align-items:center;border:1px solid var(--line);border-radius:6px;padding:11px 13px;font-weight:600;font-size:15px}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(24px + env(safe-area-inset-bottom,0px));background:#111;color:#fff;padding:12px 18px;border-radius:8px;font-weight:600;z-index:99;font-size:14px}
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <button class="logo" id="logo" title="Home">ARENA<span>CLUB</span></button>
+  <nav class="navlinks" id="navlinks"></nav>
+  <div class="navright">
+    <button class="me" id="me"><span class="avatar"></span><span class="who">alan4</span></button>
+    <div class="points">0.0 points</div>
+    <button class="pillbtn logout">Log Out</button>
+    <button class="pillbtn start" id="startwork">Start Work</button>
+  </div>
+</header>
+
+<main id="view"></main>
+
+<script>
+(function(){
+"use strict";
+
+/* ===================== reference data ===================== */
+const OPS = ["Process","Boxing","Scan","Assemble","Slabbing","Shipping","Reject"];
+const TABS = ["Grading","Operations","Vaulting","Packs","Tasks","Orders","Cards","Users","Items","Graders","Create Admin"];
+
+const SKILLS = [
+ ["Crop",0],["Centering",0],["Corner",0],["Edge",0],["Surface",0],["Signature",0],["Card Type",0],["Card Hedge",0],
+ ["Review",1],["Review Premium",1],["Verify Crop",0],["Verify Centering",0],
+ ["Verify Corner",0],["Verify Edge",0],["Verify Surface",0],["Verify Signature",0],
+ ["Baseball Card Type",0],["Football Card Type",0],["Basketball Card Type",0],["Soccer Card Type",0],
+ ["Other Card Type",0],["Entertainment Card Type",0],["Tcg Card Type",0],["Create Or Edit Set",1],
+ ["Verify Baseball Card Type",0],["Verify Football Card Type",0],["Verify Basketball Card Type",0],
+ ["Verify Soccer Card Type",0],["Verify Other Card Type",0],["Verify Entertainment Card Type",0],
+ ["Verify Tcg Card Type",0],["Verify Create Set",1],["Estimate Value",1],["Verify Estimate Value",1],
+ ["Merge",1],["Verify Review",1],
+ ["Release Order",1],["Process Order",1],["Assemble",1],["Slab",1],["Scan",1],["Checkout Vault",1],
+ ["Create Reject Order",1],["Ship Order",1],["Customer Support",1],["Tech Support",1],["Authenticate",1],
+ ["View Grader Names",1],
+ ["Slab Pack",1],["Edit Skills",1],["View Orders",1],["View Assigned Tasks",1],["Ac Offers Edit",1],
+ ["Ac Offers View",1],["Timebox",1],["View Items",1],["Process Items",1],["Edit Items",1],
+ ["Auctions Approve",0],["Hardware",1]
+];
+
+const GRADERS = [
+ ["alan","Alan Bailey","alan@arenaclub.com","June 14, 2022 at 09:12 AM"],
+ ["colin","Colin Nichols","cnichols@arenaclub.com","March 2, 2023 at 08:41 AM"],
+ ["daniel","Daniel Beaton","dbeaton@arenaclub.com","July 18, 2023 at 10:05 AM"],
+ ["eli","Eli Meyers","emeyers@arenaclub.com","January 9, 2024 at 09:33 AM"],
+ ["garrett","Garrett Woffinden","gwoffinden@arenaclub.com","May 21, 2024 at 11:47 AM"],
+ ["jess","Jessica Hughes","jhughes@arenaclub.com","September 6, 2024 at 08:19 AM"],
+ ["joe","Joseph Carver","jcarver@arenaclub.com","February 3, 2025 at 01:26 PM"],
+ ["fig","Marissa Figueroa","mfigueroa@arenaclub.com","June 30, 2025 at 09:58 AM"],
+ ["jose","Jose De Los Santos","jdelossantos@arenaclub.com","November 12, 2025 at 07:44 AM"]
+];
+const ME = "alan";
+
+const LOG = [
+ ["Estimate Card Value","Recomp: https://alt.xyz/itm/b55301d8-3f34-4d6f-831e-ec99b2311d19/research?grade=BGS-9.5","09/20/26 15:04:12 | 70.9s | 7pts"],
+ ["Estimate Card Value","Recomp: https://alt.xyz/itm/b25b25cb-9ac6-420e-aedd-7b986efc0e41/research?grade=BGS-9.5","09/20/26 15:03:02 | 127.1s | 7pts"],
+ ["Estimate Card Value","Recomp: https://alt.xyz/browse","09/20/26 15:00:55 | 9.6s | 7pts"],
+ ["Scan","PO-48213 · tray 6 · 24 items committed","09/20/26 14:41:30 | 512.4s | 18pts"]
+];
+
+/* ---- station map (image: station assignment board) ----
+   edit STATIONS when the real scanner assignments land */
+const STATIONS = [
+ {n:1, scanners:["Scannius Maximus","Robin","Odin","Golaith"], printer:"FJ 1"},
+ {n:2, scanners:["Dr Doom","Batman","Donkey","Fella"], printer:"FJ 2"},
+ {n:3, scanners:["Fuji 13","Fuji 4"], printer:null},
+ {n:4, scanners:["Scanner 28","Scanner 29","Scanner 30"], printer:"FJ 4"},
+ {n:5, scanners:["Scanner 25","Scanner 26","Scanner 27"], printer:"FJ 5"},
+ {n:6, scanners:["Scanner 22","Scanner 23","Scanner 24"], printer:"FJ 6"},
+ {n:7, scanners:["Fuji 5","Fuji 6"], printer:null},
+ {n:8, scanners:["Scanner 19","Scanner 20","Scanner 21"], printer:"FJ 8"},
+ {n:9, scanners:["Scanner 16","Scanner 17","Scanner 18"], printer:"FJ 9"},
+ {n:10, scanners:["Scanner 13","Scanner 14","Scanner 15"], printer:"FJ 10"},
+ {n:11, scanners:["Scanner 10","Scanner 11","Scanner 12"], printer:"FJ 11"},
+ {n:12, scanners:["Scanner 7","Scanner 8","Scanner 9"], printer:"FJ 12"},
+ {n:13, scanners:["Scanner 4","Scanner 5","Scanner 6"], printer:"FJ 13"},
+ {n:14, scanners:["Scanner 1","Scanner 2","Scanner 3"], printer:"FJ 15", note:"FJ 14 is missing, so this station uses 15"}
+];
+
+/* hardware sitting in the cage, not placed at a station yet */
+const SPARE = ["Scanner 31","Scanner 32","Fuji 7","Fuji 8","FJ 3","FJ 7","FJ 14"];
+
+function hwType(name){
+  if(/^fuji/i.test(name)) return "Fuji";
+  if(/^fj\s/i.test(name)) return "Printer";
+  return "V600";
+}
+
+/* who currently holds a piece of hardware — name: [user, email] */
+const ASSIGNED = {
+ "Scannius Maximus":["Alan Bailey","alan@arenaclub.com"],
+ "Robin":["Colin Nichols","cnichols@arenaclub.com"],
+ "Odin":["Daniel Beaton","dbeaton@arenaclub.com"],
+ "Batman":["Eli Meyers","emeyers@arenaclub.com"],
+ "Scanner 20":["Garrett Woffinden","gwoffinden@arenaclub.com"],
+ "Scanner 17":["Jessica Hughes","jhughes@arenaclub.com"],
+ "Scanner 14":["Joseph Carver","jcarver@arenaclub.com"],
+ "Scanner 11":["Marissa Figueroa","mfigueroa@arenaclub.com"],
+ "Scanner 5":["Jose De Los Santos","jdelossantos@arenaclub.com"]
+};
+
+function hwid(seed){
+  let s=""; for(let i=0;i<12;i++){ seed=(seed*9301+49297)%233280; s+="0123456789abcdef"[seed%16]; }
+  return s;
+}
+function mkHw(name, station, i){
+  const a=ASSIGNED[name]||null;
+  return {id:"hw"+i, name:name, type:hwType(name), station:station, user:a?a[0]:"", email:a?a[1]:""};
+}
+const HARDWARE = (function(){
+  const list=[]; let i=1;
+  STATIONS.forEach(function(st){
+    st.scanners.forEach(function(n){ list.push(mkHw(n, st.n, i++)); });
+    if(st.printer) list.push(mkHw(st.printer, st.n, i++));
+  });
+  SPARE.forEach(function(n){ list.push(mkHw(n, null, i++)); });
+  return list;
+})();
+const STATION_NOTES = {};
+STATIONS.forEach(function(st){ if(st.note) STATION_NOTES[st.n]=st.note; });
+
+/* cell types: text | box | link | date | tag | act */
+const C = {
+  ordercols:[
+    {h:"Boxes",t:"box"},{h:"Order Number",t:"link"},{h:"Due Date &uarr;",t:"date"},{h:"Name"},
+    {h:"Username",t:"link"},{h:"Graded"},{h:"Raw"},{h:"Order Kind",t:"act"}
+  ]
+};
+
+function ord(b,n,d,late,name,user,g,r,kind,act){
+  return [b,n,[d,late],name,user,g,r,[act||"Submit","green",kind]];
+}
+
+const PAGES = {
+ process:{nav:"Operations",title:"Pending Process",
+  filters:[{id:"order",t:"text",ph:"Order Number",col:1},{id:"kind",t:"select",label:"Order Kind",opts:["Any","Bulk","Standard","Express"],col:7},{id:"auth",t:"select",label:"Authentication Status",opts:["Any","Authenticated","Pending","Failed"],wide:1}],
+  cols:C.ordercols,
+  tabs:[
+   {k:"process",label:"Process",count:"212",rows:[
+    ord(1,"19353402","JAN 1, 2026","8m overdue","Arena Club","arenaclub",1,0,"Bulk"),
+    ord(12,"19421880","JAN 2, 2026","8m overdue","Arena Club","arenaclub",144,0,"Bulk"),
+    ord(10,"19422019","JAN 2, 2026","8m overdue","Arena Club","arenaclub",120,0,"Bulk"),
+    ord(3,"19498014","SEP 22, 2026","","Marcus Webb","mwebb44",26,8,"Standard"),
+    ord(1,"19499771","SEP 24, 2026","","Dana Ruiz","druiz",9,1,"Express"),
+    ord(2,"19500240","SEP 25, 2026","","Kyle Nakamura","knakamura",14,0,"Standard")
+   ]},
+   {k:"reprocess",label:"Reprocess",count:"4",rows:[
+    ord(1,"19488020","SEP 20, 2026","3d overdue","Arena Club","arenaclub",11,0,"Bulk","Reprocess"),
+    ord(1,"19492118","SEP 23, 2026","","Priya Nair","pnair",4,2,"Standard","Reprocess")
+   ]}
+  ]},
+
+ boxing:{nav:"Operations",title:"Pending Boxing",
+  filters:[{id:"order",t:"text",ph:"Order Number",col:1},{id:"team",t:"select",label:"Assigned Team",opts:["Any","PL Boxing","OR Boxing","Unassigned"],col:5}],
+  cols:[{h:"Box",t:"box"},{h:"Order Number",t:"link"},{h:"Cards"},{h:"Due Date &uarr;",t:"date"},{h:"Assigned To"},{h:"Status",t:"tag"},{h:"Action",t:"act"}],
+  tabs:[
+   {k:"boxing",label:"Boxing",count:"58",rows:[
+    ["BX-10442","19423958",120,["JAN 2, 2026","8m overdue"],"PL Boxing",["In progress","warn"],["Open","blue","PL Boxing"]],
+    ["BX-10443","19423958",120,["JAN 2, 2026","8m overdue"],"PL Boxing",["Not started","grey"],["Open","blue","PL Boxing"]],
+    ["BX-10488","19482688",179,["JAN 2, 2026","8m overdue"],"OR Boxing",["In progress","warn"],["Open","blue","OR Boxing"]],
+    ["BX-10512","19501140",18,["SEP 24, 2026",""],"Unassigned",["Not started","grey"],["Open","blue","Unassigned"]],
+    ["BX-10513","19501288",8,["SEP 26, 2026",""],"PL Boxing",["Not started","grey"],["Open","blue","PL Boxing"]]
+   ]},
+   {k:"partial",label:"Partial",count:"6",rows:[
+    ["BX-10390","19412204",96,["SEP 19, 2026","4d overdue"],"PL Boxing",["Missing 4 cards","err"],["Resolve","grey","PL Boxing"]],
+    ["BX-10401","19418800",60,["SEP 21, 2026","2d overdue"],"OR Boxing",["Missing 1 card","err"],["Resolve","grey","OR Boxing"]]
+   ]}
+  ]},
+
+ scan:{nav:"Operations",title:"Pending Scan",
+  filters:[{id:"order",t:"text",ph:"Order Number",col:1},{id:"kind",t:"select",label:"Order Kind",opts:["Any","Bulk","Standard","Express"],col:7},{id:"auth",t:"select",label:"Authentication Status",opts:["Any","Authenticated","Pending","Failed"],wide:1}],
+  cols:C.ordercols,
+  tabs:[
+   {k:"scan",label:"Scan",count:"147",rows:[
+    ord(1,"19353724","JAN 1, 2026","8m overdue","Arena Club","arenaclub",1,0,"Bulk"),
+    ord(1,"19360151","JAN 1, 2026","8m overdue","Arena Club","arenaclub",7,0,"Bulk"),
+    ord(10,"19423958","JAN 2, 2026","8m overdue","Arena Club","arenaclub",120,0,"Bulk"),
+    ord(11,"19423625","JAN 2, 2026","8m overdue","Arena Club","arenaclub",130,0,"Bulk"),
+    ord(10,"19423924","JAN 2, 2026","8m overdue","Arena Club","arenaclub",120,0,"Bulk"),
+    ord(15,"19482688","JAN 2, 2026","8m overdue","Arena Club","arenaclub",179,0,"Bulk"),
+    ord(10,"19474339","JAN 2, 2026","8m overdue","Arena Club","arenaclub",120,0,"Bulk"),
+    ord(11,"19423822","JAN 2, 2026","8m overdue","Arena Club","arenaclub",126,0,"Bulk"),
+    ord(2,"19501140","SEP 24, 2026","","Marcus Webb","mwebb44",18,4,"Standard"),
+    ord(1,"19501288","SEP 26, 2026","","Dana Ruiz","druiz",6,2,"Express")
+   ]},
+   {k:"rescan",label:"Rescan",count:"3",rows:[
+    ord(1,"19487301","SEP 22, 2026","1d overdue","Arena Club","arenaclub",12,0,"Bulk","Rescan"),
+    ord(1,"19498822","SEP 25, 2026","","Priya Nair","pnair",3,1,"Standard","Rescan"),
+    ord(2,"19499104","SEP 25, 2026","","Arena Club","arenaclub",24,0,"Bulk","Rescan")
+   ]}
+  ],
+  extraTabs:[{k:"hardware",label:"Hardware",count:String(HARDWARE.length),skill:"Hardware"}]},
+
+ assemble:{nav:"Operations",title:"Pending Assemble",
+  filters:[{id:"order",t:"text",ph:"Order Number",col:1},{id:"label",t:"select",label:"Label Status",opts:["Any","Printed","Queued","Reprint"],col:4}],
+  cols:[{h:"Tray",t:"box"},{h:"Order Number",t:"link"},{h:"Cards"},{h:"Grade Range"},{h:"Label Status"},{h:"Due Date &uarr;",t:"date"},{h:"Action",t:"act"}],
+  tabs:[
+   {k:"assemble",label:"Assemble",count:"41",rows:[
+    ["TR-2201","19423625",130,"7 – 10","Printed",["JAN 2, 2026","8m overdue"],["Assemble","green","Printed"]],
+    ["TR-2202","19423625",120,"8 – 10","Printed",["JAN 2, 2026","8m overdue"],["Assemble","green","Printed"]],
+    ["TR-2214","19474339",120,"6 – 9.5","Queued",["JAN 2, 2026","8m overdue"],["Assemble","green","Queued"]],
+    ["TR-2260","19501140",18,"8 – 10","Printed",["SEP 24, 2026",""],["Assemble","green","Printed"]]
+   ]},
+   {k:"hold",label:"Hold",count:"5",rows:[
+    ["TR-2188","19418800",60,"5 – 9","Reprint",["SEP 21, 2026","2d overdue"],["Release","grey","Reprint"]],
+    ["TR-2190","19419002",44,"7 – 10","Reprint",["SEP 21, 2026","2d overdue"],["Release","grey","Reprint"]]
+   ]}
+  ]},
+
+ slabbing:{nav:"Operations",title:"Pending Slabbing",
+  filters:[{id:"order",t:"text",ph:"Order Number",col:1},{id:"slab",t:"select",label:"Slab Type",opts:["Any","Standard","Thick","Oversize"],col:3}],
+  cols:[{h:"Tray",t:"box"},{h:"Order Number",t:"link"},{h:"Cards"},{h:"Slab Type"},{h:"Press"},{h:"Due Date &uarr;",t:"date"},{h:"Action",t:"act"}],
+  tabs:[
+   {k:"slab",label:"Slab",count:"33",rows:[
+    ["TR-2150","19423958",120,"Standard","Press 1",["JAN 2, 2026","8m overdue"],["Slab","green","Standard"]],
+    ["TR-2151","19423958",110,"Standard","Press 2",["JAN 2, 2026","8m overdue"],["Slab","green","Standard"]],
+    ["TR-2168","19482688",96,"Thick","Press 3",["JAN 2, 2026","8m overdue"],["Slab","green","Thick"]],
+    ["TR-2244","19501288",8,"Oversize","Press 1",["SEP 26, 2026",""],["Slab","green","Oversize"]]
+   ]},
+   {k:"qc",label:"QC",count:"9",rows:[
+    ["TR-2140","19412204",52,"Standard","Press 2",["SEP 19, 2026","4d overdue"],["Inspect","blue","Standard"]],
+    ["TR-2142","19412204",48,"Standard","Press 2",["SEP 19, 2026","4d overdue"],["Inspect","blue","Standard"]]
+   ]}
+  ]},
+
+ shipping:{nav:"Operations",title:"Pending Shipping",
+  filters:[{id:"order",t:"text",ph:"Order Number",col:0},{id:"carrier",t:"select",label:"Carrier",opts:["Any","FedEx","UPS","USPS"],col:4}],
+  cols:[{h:"Order Number",t:"link"},{h:"Name"},{h:"Username",t:"link"},{h:"Items"},{h:"Carrier"},{h:"Due Date &uarr;",t:"date"},{h:"Status",t:"tag"},{h:"Action",t:"act"}],
+  tabs:[
+   {k:"ready",label:"Ready",count:"64",rows:[
+    ["19410220","Arena Club","arenaclub",120,"FedEx",["SEP 22, 2026","1d overdue"],["Label printed","ok"],["Ship","green","FedEx"]],
+    ["19410994","Marcus Webb","mwebb44",26,"UPS",["SEP 24, 2026",""],["Label printed","ok"],["Ship","green","UPS"]],
+    ["19411550","Dana Ruiz","druiz",9,"USPS",["SEP 25, 2026",""],["Awaiting label","warn"],["Ship","green","USPS"]],
+    ["19412001","Kyle Nakamura","knakamura",14,"FedEx",["SEP 26, 2026",""],["Label printed","ok"],["Ship","green","FedEx"]]
+   ]},
+   {k:"held",label:"Held",count:"7",rows:[
+    ["19402118","Priya Nair","pnair",4,"UPS",["SEP 18, 2026","5d overdue"],["Address issue","err"],["Resolve","grey","UPS"]],
+    ["19403900","Arena Club","arenaclub",60,"FedEx",["SEP 19, 2026","4d overdue"],["Payment hold","err"],["Resolve","grey","FedEx"]]
+   ]}
+  ]},
+
+ reject:{nav:"Operations",title:"Rejects",
+  filters:[{id:"ac",t:"text",ph:"AC Number",col:0},{id:"stage",t:"select",label:"Stage",opts:["Any","Process","Scan","Grading","Assemble","Slabbing"],col:3}],
+  cols:[{h:"AC Number",t:"link"},{h:"Order Number",t:"link"},{h:"Reason"},{h:"Stage"},{h:"Logged By"},{h:"Date &uarr;",t:"date"},{h:"Action",t:"act"}],
+  tabs:[
+   {k:"open",label:"Open",count:"22",rows:[
+    ["AC80421775","19423958","Image blur on back","Scan","Colin Nichols",["SEP 20, 2026",""],["Review","blue","Scan"]],
+    ["AC80419902","19423625","Card not in order","Process","Daniel Beaton",["SEP 20, 2026",""],["Review","blue","Process"]],
+    ["AC80418810","19482688","Damaged corner on arrival","Process","Eli Meyers",["SEP 19, 2026",""],["Review","blue","Process"]],
+    ["AC80417744","19474339","Label mismatch","Assemble","Marissa Figueroa",["SEP 18, 2026",""],["Review","blue","Assemble"]]
+   ]},
+   {k:"resolved",label:"Resolved",count:"318",rows:[
+    ["AC80410021","19402118","Rescanned and cleared","Scan","Colin Nichols",["SEP 15, 2026",""],["View","grey","Scan"]],
+    ["AC80409980","19402118","Returned to customer","Process","Alan Bailey",["SEP 14, 2026",""],["View","grey","Process"]]
+   ]}
+  ]},
+
+ grading:{nav:"Grading",title:"Grading Queue",
+  filters:[{id:"ac",t:"text",ph:"AC Number",col:1},{id:"skill",t:"select",label:"Skill",opts:["Any","Centering","Corner","Edge","Surface","Review"],col:3}],
+  cols:[{h:"Task"},{h:"AC Number",t:"link"},{h:"Card"},{h:"Skill"},{h:"Grader"},{h:"Age"},{h:"Action",t:"act"}],
+  tabs:[
+   {k:"assigned",label:"Assigned",count:"24",rows:[
+    ["TSK-91204","AC80421773","2026 Topps Chrome · Elly De La Cruz","Centering","Colin Nichols","12m",["Open","blue","Centering"]],
+    ["TSK-91205","AC80421774","2026 Topps Chrome · Paul Skenes","Corner","Daniel Beaton","18m",["Open","blue","Corner"]],
+    ["TSK-91208","AC80421776","2025 Prizm · Victor Wembanyama","Surface","Eli Meyers","31m",["Open","blue","Surface"]]
+   ]},
+   {k:"unassigned",label:"Unassigned",count:"118",rows:[
+    ["TSK-91310","AC80421780","2024 Bowman 1st · Sebastian Walcott","Edge","—","2h",["Assign","green","Edge"]],
+    ["TSK-91311","AC80421781","1999 UD MVP · Michael Jordan","Centering","—","2h",["Assign","green","Centering"]],
+    ["TSK-91312","AC80421782","2026 Select · Caleb Williams","Surface","—","3h",["Assign","green","Surface"]]
+   ]},
+   {k:"verify",label:"Verify",count:"9",rows:[
+    ["TSK-91120","AC80421650","2025 Donruss · Jayden Daniels","Review","Alan Bailey","1d",["Verify","grey","Review"]],
+    ["TSK-91121","AC80421651","2025 Prizm · Bijan Robinson","Review","Marissa Figueroa","1d",["Verify","grey","Review"]]
+   ]}
+  ]},
+
+ vaulting:{nav:"Vaulting",title:"Vault",
+  filters:[{id:"ac",t:"text",ph:"AC Number",col:0},{id:"loc",t:"select",label:"Location",opts:["Any","Vault A","Vault B","In transit"],col:3}],
+  cols:[{h:"AC Number",t:"link"},{h:"Card"},{h:"Owner"},{h:"Location"},{h:"Est. Value"},{h:"Since"},{h:"Action",t:"act"}],
+  tabs:[
+   {k:"checkin",label:"Check In",count:"32",rows:[
+    ["AC80420115","2025 Prizm · Victor Wembanyama PSA 10","mwebb44","In transit","$1,240","SEP 20, 2026",["Check in","green","In transit"]],
+    ["AC80420116","2026 Topps Chrome · Paul Skenes BGS 9.5","druiz","In transit","$410","SEP 20, 2026",["Check in","green","In transit"]]
+   ]},
+   {k:"checkout",label:"Check Out",count:"7",rows:[
+    ["AC80399012","1999 UD MVP · Michael Jordan PSA 9","knakamura","Vault A","$180","MAR 4, 2026",["Check out","blue","Vault A"]],
+    ["AC80399440","2024 Bowman 1st · Jackson Holliday PSA 10","pnair","Vault B","$96","APR 11, 2026",["Check out","blue","Vault B"]]
+   ]},
+   {k:"stored",label:"Stored",count:"148,203",rows:[
+    ["AC80311002","2021 Prizm · Ja'Marr Chase PSA 10","arenaclub","Vault A","$310","NOV 2, 2025",["View","grey","Vault A"]],
+    ["AC80311440","2020 Topps Chrome · Luis Robert BGS 9.5","arenaclub","Vault B","$88","NOV 2, 2025",["View","grey","Vault B"]]
+   ]}
+  ]},
+
+ packs:{nav:"Packs",title:"Slab Packs",
+  filters:[{id:"pack",t:"text",ph:"Pack Name",col:0},{id:"sport",t:"select",label:"Sport",opts:["Any","Baseball","Basketball","Football","Pokemon"],col:1}],
+  cols:[{h:"Pack",t:"link"},{h:"Sport"},{h:"Cards"},{h:"Price"},{h:"Status",t:"tag"},{h:"Created"},{h:"Action",t:"act"}],
+  tabs:[
+   {k:"live",label:"Live",count:"12",rows:[
+    ["Rookie Heat · Baseball","Baseball",4,"$59",["Live","ok"],"SEP 12, 2026",["Edit","blue","Baseball"]],
+    ["Court Kings","Basketball",3,"$99",["Live","ok"],"SEP 14, 2026",["Edit","blue","Basketball"]],
+    ["Gridiron Prospects","Football",5,"$45",["Live","ok"],"SEP 16, 2026",["Edit","blue","Football"]]
+   ]},
+   {k:"draft",label:"Draft",count:"5",rows:[
+    ["Holo Chase","Pokemon",3,"$120",["Draft","grey"],"SEP 18, 2026",["Edit","blue","Pokemon"]],
+    ["Diamond Debut","Baseball",4,"$75",["Draft","grey"],"SEP 19, 2026",["Edit","blue","Baseball"]]
+   ]},
+   {k:"sold",label:"Sold Out",count:"340",rows:[
+    ["Summer Slam Pack","Basketball",4,"$150",["Sold out","err"],"AUG 2, 2026",["View","grey","Basketball"]]
+   ]}
+  ]},
+
+ tasks:{nav:"Tasks",title:"Tasks",
+  filters:[{id:"task",t:"text",ph:"Task ID",col:0},{id:"type",t:"select",label:"Type",opts:["Any","Scan","Grading","Assemble","Shipping"],col:1}],
+  cols:[{h:"Task",t:"link"},{h:"Type"},{h:"Order Number",t:"link"},{h:"Assigned To"},{h:"Due"},{h:"Priority",t:"tag"},{h:"Action",t:"act"}],
+  tabs:[
+   {k:"mine",label:"My Tasks",count:"6",rows:[
+    ["TSK-91400","Scan","19423958","Alan Bailey","Today",["High","err"],["Start","green","Scan"]],
+    ["TSK-91402","Grading","19423625","Alan Bailey","Today",["Normal","info"],["Start","green","Grading"]],
+    ["TSK-91410","Shipping","19410220","Alan Bailey","Tomorrow",["Normal","info"],["Start","green","Shipping"]]
+   ]},
+   {k:"team",label:"Team",count:"41",rows:[
+    ["TSK-91420","Assemble","19474339","Colin Nichols","Today",["High","err"],["View","grey","Assemble"]],
+    ["TSK-91425","Scan","19482688","Colin Nichols","Today",["Normal","info"],["View","grey","Scan"]]
+   ]},
+   {k:"done",label:"Done",count:"219",rows:[
+    ["TSK-91100","Scan","19402118","Colin Nichols","SEP 18, 2026",["Normal","info"],["View","grey","Scan"]]
+   ]}
+  ]},
+
+ orders:{nav:"Orders",title:"Orders",
+  filters:[{id:"order",t:"text",ph:"Order Number",col:0},{id:"kind",t:"select",label:"Order Kind",opts:["Any","Bulk","Standard","Express"],col:6}],
+  cols:[{h:"Order Number",t:"link"},{h:"Name"},{h:"Username",t:"link"},{h:"Items"},{h:"Stage",t:"tag"},{h:"Due Date &uarr;",t:"date"},{h:"Kind"},{h:"Action",t:"act"}],
+  tabs:[
+   {k:"open",label:"Open",count:"1,204",rows:[
+    ["19423958","Arena Club","arenaclub",120,["Scan","info"],["JAN 2, 2026","8m overdue"],"Bulk",["View","blue","Bulk"]],
+    ["19482688","Arena Club","arenaclub",179,["Slabbing","info"],["JAN 2, 2026","8m overdue"],"Bulk",["View","blue","Bulk"]],
+    ["19501140","Marcus Webb","mwebb44",22,["Process","info"],["SEP 24, 2026",""],"Standard",["View","blue","Standard"]],
+    ["19501288","Dana Ruiz","druiz",8,["Boxing","info"],["SEP 26, 2026",""],"Express",["View","blue","Express"]]
+   ]},
+   {k:"complete",label:"Complete",count:"38,902",rows:[
+    ["19402118","Priya Nair","pnair",6,["Shipped","ok"],["SEP 18, 2026",""],"Standard",["View","grey","Standard"]]
+   ]},
+   {k:"cancelled",label:"Cancelled",count:"144",rows:[
+    ["19388001","Kyle Nakamura","knakamura",3,["Cancelled","err"],["AUG 30, 2026",""],"Standard",["View","grey","Standard"]]
+   ]}
+  ]},
+
+ cards:{nav:"Cards",title:"Cards",
+  filters:[{id:"ac",t:"text",ph:"AC Number",col:0},{id:"sport",t:"select",label:"Sport",opts:["Any","Baseball","Basketball","Football"],col:2}],
+  cols:[{h:"AC Number",t:"link"},{h:"Card"},{h:"Sport"},{h:"Grade"},{h:"Est. Value"},{h:"Stage",t:"tag"},{h:"Action",t:"act"}],
+  tabs:[
+   {k:"all",label:"All",count:"812,440",rows:[
+    ["AC80421773","2026 Topps Chrome · Elly De La Cruz","Baseball","—","$64",["Scan","info"],["View","blue","Baseball"]],
+    ["AC80421776","2025 Prizm · Victor Wembanyama","Basketball","10","$1,240",["Vaulted","ok"],["View","blue","Basketball"]],
+    ["AC80421778","2026 Select · Caleb Williams","Football","9.5","$210",["Grading","info"],["View","blue","Football"]]
+   ]},
+   {k:"graded",label:"Graded",count:"604,118",rows:[
+    ["AC80399012","1999 UD MVP · Michael Jordan","Basketball","9","$180",["Vaulted","ok"],["View","blue","Basketball"]]
+   ]},
+   {k:"raw",label:"Raw",count:"208,322",rows:[
+    ["AC80421790","2024 Bowman 1st · Sebastian Walcott","Baseball","—","$38",["Process","info"],["View","blue","Baseball"]]
+   ]}
+  ]},
+
+ users:{nav:"Users",title:"Users",
+  filters:[{id:"name",t:"text",ph:"Name or username",col:0},{id:"kind",t:"select",label:"Account Type",opts:["Any","Customer","Admin","Suspended"],wide:1}],
+  cols:[{h:"Name"},{h:"Username",t:"link"},{h:"Email"},{h:"Orders"},{h:"Joined"},{h:"Action",t:"act"}],
+  tabs:[
+   {k:"customers",label:"Customers",count:"84,102",rows:[
+    ["Marcus Webb","mwebb44","mwebb44@gmail.com",22,"FEB 3, 2025",["View","blue",""]],
+    ["Dana Ruiz","druiz","dana.ruiz@outlook.com",9,"JUN 17, 2025",["View","blue",""]],
+    ["Kyle Nakamura","knakamura","kyle.n@fastmail.com",41,"SEP 2, 2024",["View","blue",""]],
+    ["Priya Nair","pnair","priya.nair@gmail.com",4,"APR 22, 2026",["View","blue",""]]
+   ]},
+   {k:"admins",label:"Admins",count:"61",rows:[
+    ["Alan Bailey","alan4","alan@arenaclub.com","—","JUN 14, 2022",["View","blue",""]],
+    ["Daniel Beaton","apark","apark@arenaclub.com","—","DEC 4, 2025",["View","blue",""]],
+    ["Marissa Figueroa","mvega","mvega@arenaclub.com","—","OCT 21, 2025",["View","blue",""]]
+   ]},
+   {k:"suspended",label:"Suspended",count:"3",rows:[
+    ["Test Account","qa_test","qa@arenaclub.com",0,"JAN 5, 2026",["Restore","grey",""]]
+   ]}
+  ]},
+
+ items:{nav:"Items",title:"Items",
+  filters:[{id:"ac",t:"text",ph:"AC Number",col:0},{id:"type",t:"select",label:"Item Type",opts:["Any","Card","Coin","Wine","Other"],col:2}],
+  cols:[{h:"AC Number",t:"link"},{h:"Item"},{h:"Type"},{h:"PO",t:"link"},{h:"Status",t:"tag"},{h:"Received"},{h:"Action",t:"act"}],
+  tabs:[
+   {k:"pending",label:"Pending",count:"96",rows:[
+    ["AC80421801","2026 Topps Chrome hobby box","Card","PO-48213",["Received","info"],"SEP 19, 2026",["Process","green","Card"]],
+    ["AC80421802","1oz Gold Eagle 2024","Coin","PO-48220",["Received","info"],"SEP 19, 2026",["Process","green","Coin"]],
+    ["AC80421803","Opus One 2018","Wine","PO-48221",["Received","info"],"SEP 20, 2026",["Process","green","Wine"]]
+   ]},
+   {k:"processed",label:"Processed",count:"12,880",rows:[
+    ["AC80420115","2025 Prizm · Victor Wembanyama","Card","PO-48100",["Processed","ok"],"SEP 10, 2026",["View","grey","Card"]]
+   ]},
+   {k:"rejected",label:"Rejected",count:"41",rows:[
+    ["AC80418810","Damaged slab","Card","PO-48090",["Rejected","err"],"SEP 8, 2026",["View","grey","Card"]]
+   ]}
+  ]}
+};
+
+/* ===================== state ===================== */
+const KEY = "ac-admin-proto-v5";
+let store = {skills:{},device:"v850-1",working:false};
+try{ const raw = localStorage.getItem(KEY); if(raw) store = Object.assign(store, JSON.parse(raw)); }catch(e){}
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify(store)); }catch(e){} }
+function skillsFor(id){
+  if(!store.skills[id]){ const s={}; SKILLS.forEach(function(x){ s[x[0]] = !!x[1]; }); store.skills[id]=s; }
+  return store.skills[id];
+}
+function hasSkill(n){ return !!skillsFor(ME)[n]; }
+
+let toastT;
+function toast(msg){
+  const old=document.querySelector(".toast"); if(old) old.remove();
+  const el=document.createElement("div"); el.className="toast"; el.textContent=msg;
+  document.body.appendChild(el); clearTimeout(toastT);
+  toastT=setTimeout(function(){ el.remove(); },2600);
+}
+function esc(s){ return String(s).replace(/[&<>"]/g,function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); }
+function go(h){ location.hash = h; }
+
+/* ===================== nav ===================== */
+const navEl = document.getElementById("navlinks");
+const view = document.getElementById("view");
+
+function buildNav(){
+  TABS.forEach(function(tab){
+    if(tab === "Operations"){
+      const b=document.createElement("button"); b.className="navbtn"; b.textContent="Operations";
+      b.setAttribute("aria-haspopup","true");
+      const m=document.createElement("div"); m.className="menu"; m.id="opsmenu";
+      OPS.forEach(function(o){
+        const mb=document.createElement("button"); mb.textContent=o;
+        if(o === "Scan"){
+          mb.onclick=function(e){ e.stopPropagation(); m.classList.remove("open"); go("#/p/scan"); };
+        } else {
+          mb.className="dim"; mb.disabled=true;
+        }
+        m.appendChild(mb);
+      });
+      b.onclick=function(e){
+        e.stopPropagation();
+        const open = m.classList.contains("open");
+        document.querySelectorAll(".menu.open").forEach(function(x){ x.classList.remove("open"); });
+        if(open) return;
+        const r = b.getBoundingClientRect();
+        m.style.top = (r.bottom + 8) + "px";
+        m.style.left = Math.max(8, Math.min(r.left, window.innerWidth - 274)) + "px";
+        m.classList.add("open");
+      };
+      navEl.appendChild(b);
+      document.body.appendChild(m);
+    } else {
+      const b=document.createElement("button"); b.className="navbtn"; b.textContent=tab;
+      if(tab !== "Graders"){
+        b.classList.add("dim"); b.disabled = true;
+      } else {
+        b.onclick=function(){
+          document.querySelectorAll(".menu.open").forEach(function(x){ x.classList.remove("open"); });
+          go("#/graders");
+        };
+      }
+      navEl.appendChild(b);
+    }
+  });
+}
+document.addEventListener("click",function(){ document.querySelectorAll(".menu.open").forEach(function(x){ x.classList.remove("open"); }); });
+document.addEventListener("keydown",function(e){ if(e.key==="Escape") document.querySelectorAll(".menu.open").forEach(function(x){ x.classList.remove("open"); }); });
+window.addEventListener("scroll",function(){ document.querySelectorAll(".menu.open").forEach(function(x){ x.classList.remove("open"); }); },true);
+window.addEventListener("resize",function(){ document.querySelectorAll(".menu.open").forEach(function(x){ x.classList.remove("open"); }); });
+
+function markNav(active, sub){
+  Array.prototype.forEach.call(navEl.querySelectorAll(".navbtn"),function(b){ b.classList.toggle("on", b.textContent===active); });
+  const m=document.getElementById("opsmenu");
+  if(m) Array.prototype.forEach.call(m.querySelectorAll("button"),function(b){ b.classList.toggle("sel", !!sub && b.textContent.toLowerCase()===sub); });
+}
+
+const sw=document.getElementById("startwork");
+document.getElementById("logo").onclick=function(){ go("#/home"); };
+document.getElementById("me").onclick=function(){ go("#/graders/"+ME); };
+sw.onclick=function(){
+  store.working=!store.working; save();
+  sw.textContent=store.working?"Stop Work":"Start Work";
+  sw.classList.toggle("on",store.working);
+  toast(store.working?"Clocked in":"Clocked out");
+};
+if(store.working){ sw.textContent="Stop Work"; sw.classList.add("on"); }
+
+/* ===================== table page ===================== */
+function cell(col, v){
+  const t = col.t;
+  if(t === "box")  return '<button class="boxbtn">'+esc(v)+(/^\d+$/.test(String(v))?" BOXES":"")+'</button>';
+  if(t === "link") return '<button class="olink">'+esc(v)+'</button>';
+  if(t === "date") return '<span class="datechip'+(v[1]?"":" fine")+'">&#128197; '+esc(v[0])+'</span>'+(v[1]?'<span class="overdue">'+esc(v[1])+'</span>':'');
+  if(t === "tag")  return '<span class="tag '+esc(v[1])+'">'+esc(v[0])+'</span>';
+  if(t === "act")  return '<button class="actbtn '+(v[1]==="green"?"":esc(v[1]))+'" data-a="'+esc(v[0])+'">'+esc(v[0])+'</button>';
+  return esc(v);
+}
+
+function viewPage(slug, tabKey){
+  const page = PAGES[slug];
+  if(!page){ return go("#/graders"); }
+  markNav(page.nav, page.nav==="Operations" ? slug : null);
+
+  const tabs = page.tabs.slice();
+  (page.extraTabs||[]).forEach(function(x){ if(!x.skill || hasSkill(x.skill)) tabs.push(x); });
+
+  let active = tabs.filter(function(t){ return t.k===tabKey; })[0];
+  let locked = false;
+  if(!active){
+    const hidden = (page.extraTabs||[]).filter(function(x){ return x.k===tabKey; })[0];
+    if(hidden){ locked = true; } else { active = tabs[0]; }
+  }
+
+  view.innerHTML =
+    '<h1 class="left">'+esc(page.title)+'</h1>' +
+    '<div class="muitabs">' + tabs.map(function(t){
+      return '<button class="muitab'+((!locked && active && t.k===active.k)?" on":"")+'" data-k="'+t.k+'">' +
+             esc(t.label)+'<span class="badge">'+esc(t.count)+'</span></button>';
+    }).join("") + '</div>' +
+    '<div id="body"></div>';
+
+  Array.prototype.forEach.call(view.querySelectorAll(".muitab"),function(b){
+    b.onclick=function(){ go("#/p/"+slug+"/"+b.dataset.k); };
+  });
+
+  if(locked) return paintLocked();
+  if(active.k === "hardware") return paintHardware();
+  paintTable(page, active);
+}
+
+function paintTable(page, tab){
+  const body=document.getElementById("body");
+  const f = page.filters||[];
+  body.innerHTML =
+    '<div class="filters">' + f.map(function(x){
+      const flex = x.wide ? ' style="flex:1 1 380px"' : (x.t==="text" ? ' style="flex:1 1 320px"' : '');
+      if(x.t==="text") return '<div class="mui"'+flex+'><input id="f-'+x.id+'" placeholder="'+esc(x.ph)+'" autocomplete="off"></div>';
+      return '<div class="mui"'+flex+'><label>'+esc(x.label)+'</label><select id="f-'+x.id+'">' +
+             x.opts.map(function(o){ return '<option>'+esc(o)+'</option>'; }).join("") + '</select></div>';
+    }).join("") +
+    '<button class="btn-search" id="f-go">SEARCH</button><button class="btn-clear" id="f-clear">CLEAR</button></div>' +
+    '<div class="tablewrap"><table class="dt"><thead><tr>' +
+      page.cols.map(function(c){ return '<th>'+c.h+'</th>'; }).join("") +
+    '</tr></thead><tbody id="tb"></tbody></table></div>';
+
+  function paint(rows){
+    const tb=document.getElementById("tb");
+    if(!rows.length){
+      tb.innerHTML='<tr><td colspan="'+page.cols.length+'"><div class="empty">No rows match those filters. Clear them to see the full queue.</div></td></tr>';
+      return;
+    }
+    tb.innerHTML = rows.map(function(r){
+      return '<tr>'+page.cols.map(function(c,i){ return '<td>'+cell(c,r[i])+'</td>'; }).join("")+'</tr>';
+    }).join("");
+    Array.prototype.forEach.call(tb.querySelectorAll(".actbtn"),function(b){
+      b.onclick=function(){ toast(b.dataset.a+" — prototype stub"); };
+    });
+    Array.prototype.forEach.call(tb.querySelectorAll(".boxbtn,.olink"),function(b){
+      b.onclick=function(){ toast("Opens detail — prototype stub"); };
+    });
+  }
+  paint(tab.rows);
+
+  function run(){
+    let rows=tab.rows.slice();
+    f.forEach(function(x){
+      const el=document.getElementById("f-"+x.id); if(!el || x.col===undefined) return;
+      const v=el.value.trim();
+      if(x.t==="text"){ if(v) rows=rows.filter(function(r){ return String(flat(r[x.col])).toLowerCase().indexOf(v.toLowerCase())>-1; }); }
+      else if(v && v!=="Any"){ rows=rows.filter(function(r){ return String(flat(r[x.col])).indexOf(v)>-1 || (Array.isArray(r[r.length-1]) && r[r.length-1][2]===v); }); }
+    });
+    paint(rows);
+  }
+  function flat(v){ return Array.isArray(v) ? v.join(" ") : v; }
+  document.getElementById("f-go").onclick=run;
+  f.forEach(function(x){
+    const el=document.getElementById("f-"+x.id); if(!el) return;
+    if(x.t==="text") el.onkeydown=function(e){ if(e.key==="Enter") run(); };
+    else el.onchange=run;
+  });
+  document.getElementById("f-clear").onclick=function(){
+    f.forEach(function(x){ const el=document.getElementById("f-"+x.id); if(!el) return; if(x.t==="text") el.value=""; else el.selectedIndex=0; });
+    paint(tab.rows);
+  };
+}
+
+/* ===================== hardware ===================== */
+function paintLocked(){
+  document.getElementById("body").innerHTML =
+    '<div class="lockcard"><h2>The Hardware tab is hidden</h2>' +
+    '<p>Your account does not have the Hardware skill, so the tab does not appear on Pending Scan. ' +
+    'An admin can turn it on from your grader page.</p>' +
+    '<button class="actbtn blue" id="tog">Open Alan Bailey in Graders</button></div>';
+  document.getElementById("tog").onclick=function(){ go("#/graders/"+ME); };
+}
+
+function paintHardware(){
+  const setup = store.hwview==="setup";
+  document.getElementById("body").innerHTML =
+    '<div class="segmented" id="hwseg">' +
+      '<button data-v="stations" class="'+(setup?"":"on")+'">Station setup</button>' +
+      '<button data-v="setup" class="'+(setup?"on":"")+'">Hardware setup</button>' +
+    '</div><div id="hwbody"></div>';
+  Array.prototype.forEach.call(document.querySelectorAll("#hwseg button"),function(b){
+    b.onclick=function(){ store.hwview=b.dataset.v; store.sel=null; save(); paintHardware(); };
+  });
+  if(setup) paintHwSetup(); else paintStationSetup();
+}
+
+/* ---- shared helpers ---- */
+function hwRecords(){
+  if(!store.hw) store.hw = HARDWARE.map(function(h){ return Object.assign({},h); });
+  return store.hw;
+}
+function stationList(){
+  if(!store.stations) store.stations = STATIONS.map(function(s){ return s.n; });
+  return store.stations;
+}
+function stationUsers(){
+  if(!store.su) store.su = {1:"Alan Bailey",2:"Colin Nichols",4:"Daniel Beaton",8:"Eli Meyers",9:"Garrett Woffinden",11:"Jessica Hughes",13:"Joseph Carver",14:"Marissa Figueroa"};
+  return store.su;
+}
+function emailFor(name){
+  const g=GRADERS.filter(function(x){ return x[1]===name; })[0];
+  return g?g[2]:"";
+}
+function devicesAt(n){
+  return hwRecords().filter(function(h){ return h.station===n; });
+}
+
+/* ---- station setup: stations and who runs them ---- */
+function paintStationSetup(){
+  const su=stationUsers();
+  document.getElementById("hwbody").innerHTML =
+    '<div class="filters" style="margin-bottom:16px">' +
+      muiSelect("s-user","User",["Any","Unassigned"].concat(GRADERS.map(function(g){ return g[1]; })), store.suFilter||"Any") +
+      '<button class="btn-add" id="s-add">+ Add station</button>' +
+    '</div>' +
+    '<div class="stations">' + stationList().filter(function(n){
+      const f=store.suFilter||"Any";
+      if(f==="Unassigned") return !su[n];
+      if(f!=="Any") return su[n]===f;
+      return true;
+    }).map(function(n){
+      const devs=devicesAt(n);
+      const scanners=devs.filter(function(h){ return h.type!=="Printer"; }).length;
+      const printers=devs.filter(function(h){ return h.type==="Printer"; }).length;
+      const open = !!(store.open||{})[n];
+      return '<div class="stcard" data-card="'+n+'"><button class="delst" data-del="'+n+'" title="Remove station">&times;</button><h4>Station '+n+'</h4>' +
+        (su[n]
+          ? '<div class="strow live" data-user="'+n+'">'+esc(su[n])+'<span class="x">&times;</span></div>' +
+            '<p class="stmail">'+esc(emailFor(su[n]))+'</p>'
+          : '<div class="strow slot" data-assign="'+n+'">+ assign user</div>') +
+        '<button class="disclose" data-open="'+n+'"><span>'+scanners+' scanner'+(scanners===1?"":"s")+' &middot; '+(printers?"1 printer":"no printer")+'</span>' +
+        '<i>'+(open?"&#9662;":"&#9656;")+'</i></button>' +
+        (open ? '<div class="stlist">' + (devs.length
+            ? devs.map(function(h){ return '<div class="strow t-'+h.type.toLowerCase()+'">'+(h.type==="Printer"?"Printer ":"")+esc(h.name)+'</div>'; }).join("")
+            : '<p class="note" style="text-align:center;margin:6px 0 0">Nothing placed here yet</p>') + '</div>' : '') +
+      '</div>';
+    }).join("") + '</div>';
+
+  document.getElementById("s-user").onchange=function(){ store.suFilter=this.value; save(); paintStationSetup(); };
+  document.getElementById("s-add").onclick=function(){ addStation(paintStationSetup); };
+  wireDelete(paintStationSetup);
+  Array.prototype.forEach.call(document.querySelectorAll("[data-open]"),function(el){
+    el.onclick=function(e){
+      e.stopPropagation();
+      if(!store.open) store.open={};
+      const n=el.dataset.open; store.open[n]=!store.open[n]; save(); paintStationSetup();
+    };
+  });
+  Array.prototype.forEach.call(document.querySelectorAll("[data-card]"),function(el){
+    el.onclick=function(e){
+      if(e.target.closest && e.target.closest("[data-del]")) return;
+      stationDialog(Number(el.dataset.card));
+    };
+  });
+  Array.prototype.forEach.call(document.querySelectorAll("[data-assign]"),function(el){
+    el.onclick=function(e){
+      e.stopPropagation();
+      userPicker(Number(el.dataset.assign));
+    };
+  });
+  Array.prototype.forEach.call(document.querySelectorAll("[data-user]"),function(el){
+    el.onclick=function(e){
+      e.stopPropagation();
+      const n=Number(el.dataset.user), was=su[n];
+      delete su[n]; save(); paintStationSetup(); toast(was+" removed from Station "+n);
+    };
+  });
+}
+
+/* ---- dialogs ---- */
+function modal(title, inner, onSave, saveLabel){
+  const wrap=document.createElement("div"); wrap.className="overlay";
+  wrap.innerHTML='<div class="sheet"><h3>'+esc(title)+'</h3>'+inner+
+    '<div class="sheetbar">' + (onSave?'<button class="btn-out" id="m-cancel">Cancel</button>':'') +
+    '<button class="actbtn" id="m-save">'+esc(saveLabel||(onSave?"Save":"Close"))+'</button></div></div>';
+  document.body.appendChild(wrap);
+  function close(){ wrap.remove(); }
+  wrap.onclick=function(e){ if(e.target===wrap) close(); };
+  const c=wrap.querySelector("#m-cancel"); if(c) c.onclick=close;
+  wrap.querySelector("#m-save").onclick=function(){ if(!onSave || onSave(wrap)!==false) close(); };
+  return wrap;
+}
+function addDialog(done){
+  modal("Add hardware",
+    '<div class="mui"><label>Name</label><input id="m-name" placeholder="Scanner 33"></div>' +
+    '<div class="mui" style="margin-top:18px"><label>Hardware ID</label><input id="m-id" placeholder="serial or device ID"></div>' +
+    '<div class="rowset" style="margin:18px 0 0">' +
+      muiSelect("m-type","Type",["V600","Fuji","Printer"],"V600") +
+      '<div class="mui"><label>Station</label><input id="m-station" placeholder="leave blank for the shelf"></div>' +
+    '</div>',
+    function(w){
+      const name=w.querySelector("#m-name").value.trim();
+      if(!name){ toast("Give the hardware a name"); return false; }
+      const st=w.querySelector("#m-station").value.trim();
+      hwRecords().push({
+        id:"hw"+Date.now(),
+        name:name, type:w.querySelector("#m-type").value,
+        station: st?Number(st):null, user:"", email:""
+      });
+      save(); done(); toast("Added "+name);
+    },"Add hardware");
+}
+
+function wireDelete(done){
+  Array.prototype.forEach.call(document.querySelectorAll("[data-del]"),function(el){
+    el.onclick=function(e){
+      e.stopPropagation();
+      const n=Number(el.dataset.del), su=stationUsers(), devs=devicesAt(n);
+      modal("Remove Station "+n,
+        '<p class="note" style="margin:0">' +
+        (su[n] ? esc(su[n])+' is assigned to it. ' : '') +
+        (devs.length ? devs.length+' device'+(devs.length===1?"":"s")+' will go back on the shelf.' : 'It has no hardware on it.') +
+        '</p>',
+        function(){ removeStation(n, done); }, "Remove station");
+    };
+  });
+}
+
+function addStation(done){
+  const list=stationList();
+  const next=(list.length?Math.max.apply(null,list):0)+1;
+  modal("Add a station",
+    '<div class="mui"><label>Station number</label><input id="m-n" value="'+next+'" inputmode="numeric"></div>' +
+    '<p class="note" style="margin:12px 2px 0">It starts empty — assign a user on Station setup and drag hardware to it on Hardware setup.</p>',
+    function(w){
+      const n=parseInt(w.querySelector("#m-n").value,10);
+      if(!n || n<1){ toast("Use a whole number"); return false; }
+      if(list.indexOf(n)>-1){ toast("Station "+n+" already exists"); return false; }
+      list.push(n); list.sort(function(a,b){ return a-b; });
+      save(); done(); toast("Added Station "+n);
+    },"Add station");
+}
+
+function removeStation(n, done){
+  const list=stationList(), su=stationUsers();
+  const freed=devicesAt(n);
+  freed.forEach(function(h){ h.station=null; });
+  delete su[n];
+  store.stations=list.filter(function(x){ return x!==n; });
+  save(); done();
+  toast("Removed Station "+n+(freed.length?" — "+freed.length+" device"+(freed.length===1?"":"s")+" back on the shelf":""));
+}
+
+function userPicker(n){
+  const su=stationUsers();
+  function taken(name){
+    const at=Object.keys(su).filter(function(k){ return su[k]===name && Number(k)!==n; })[0];
+    return at ? Number(at) : null;
+  }
+  const w=modal("Assign a user to Station "+n,
+    '<div class="mui" style="margin-bottom:14px"><input id="u-q" placeholder="Search users" autocomplete="off"></div>' +
+    '<div class="picker" id="u-list"></div>', null, "Close");
+  const list=w.querySelector("#u-list"), q=w.querySelector("#u-q");
+  function paint(){
+    const f=(q.value||"").toLowerCase();
+    const rows=GRADERS.filter(function(g){ return !f || g[1].toLowerCase().indexOf(f)>-1 || g[2].toLowerCase().indexOf(f)>-1; });
+    list.innerHTML = rows.length ? rows.map(function(g){
+      const at=taken(g[1]);
+      return '<button class="prow'+(at?" taken":"")+'" data-name="'+esc(g[1])+'"'+(at?" disabled":"")+'>' +
+             '<span class="ini">'+esc(g[1].split(" ").map(function(x){return x[0];}).slice(0,2).join(""))+'</span>' +
+             '<span><b>'+esc(g[1])+'</b></span>' +
+             (at?'<em>On Station '+at+'</em>':'<em class="go">Assign</em>') + '</button>';
+    }).join("") : '<p class="note">No user matches that search.</p>';
+    Array.prototype.forEach.call(list.querySelectorAll(".prow:not(.taken)"),function(b){
+      b.onclick=function(){
+        su[n]=b.dataset.name; save(); w.remove(); paintStationSetup();
+        toast(su[n]+" runs Station "+n);
+      };
+    });
+  }
+  q.oninput=paint; paint(); q.focus();
+}
+
+function stationDialog(n){
+  const su=stationUsers(), devs=devicesAt(n);
+  const scanners=devs.filter(function(h){ return h.type!=="Printer"; });
+  const printers=devs.filter(function(h){ return h.type==="Printer"; });
+  const w=modal("Station "+n,
+    '<div class="stdetail">' +
+      '<p class="lbl">Assigned user</p>' +
+      (su[n] ? '<p class="val">'+esc(su[n])+'<br><span>'+esc(emailFor(su[n]))+'</span></p>'
+             : '<p class="val muted">No user assigned</p>') +
+      '<p class="lbl">Scanners</p>' +
+      (scanners.length ? scanners.map(function(h){
+          return '<div class="strow t-'+h.type.toLowerCase()+'">'+esc(h.name)+' <em>'+esc(h.type)+'</em></div>';
+        }).join("") : '<p class="val muted">None placed</p>') +
+      '<p class="lbl">Printer</p>' +
+      (printers.length ? printers.map(function(h){
+          return '<div class="strow printer">Printer '+esc(h.name)+'</div>';
+        }).join("") : '<p class="val muted">No printer</p>') +
+      (STATION_NOTES[n] ? '<p class="val muted">'+esc(STATION_NOTES[n])+'</p>' : '') +
+      '<button class="btn-out red" id="st-del" style="margin-top:20px">Remove station</button>' +
+    '</div>', null, "Close");
+  const del=w.querySelector("#st-del");
+  del.onclick=function(){
+    del.textContent="Click again to confirm";
+    del.onclick=function(){ w.remove(); removeStation(n, paintStationSetup); };
+  };
+}
+
+/* ---- hardware setup: drag devices onto stations ---- */
+function paintHwSetup(){
+  const recs=hwRecords(), su=stationUsers();
+  const type=store.poolType||"V600";
+  const q=(store.poolQ||"").toLowerCase();
+  const pool=recs.filter(function(h){
+    return !h.station && h.type===type && (!q || h.name.toLowerCase().indexOf(q)>-1);
+  });
+
+  document.getElementById("hwbody").innerHTML =
+    '<p class="poolhint">Drag a device from the right onto a station. Drag it back to the shelf to free it up. ' +
+    'On a touch screen, tap the device then tap the station.</p>' +
+    '<div class="dnd">' +
+      '<div class="dndleft"><div class="stations">' + stationList().map(function(n){
+        const devs=devicesAt(n);
+        return '<div class="stcard drop" data-drop="'+n+'"><button class="delst" data-del="'+n+'" title="Remove station">&times;</button><h4>Station '+n+'</h4>' +
+          (su[n]?'<p class="stmail">'+esc(su[n])+'</p>':'') +
+          devs.map(function(h){
+            return '<div class="strow t-'+h.type.toLowerCase()+'" draggable="true" data-id="'+h.id+'">' +
+                   (h.type==="Printer"?"Printer ":"")+esc(h.name)+'</div>';
+          }).join("") +
+          (devs.length?'':'<div class="strow slot">drop hardware here</div>') +
+          (STATION_NOTES[n]?'<div class="stnote">'+esc(STATION_NOTES[n])+'</div>':'') +
+        '</div>';
+      }).join("") + '</div></div>' +
+      '<aside class="dndright drop" data-drop="pool">' +
+        '<div class="mui" style="margin-bottom:18px"><label>Type</label><select id="p-type">' +
+          ["V600","Fuji","Printer"].map(function(o){ return '<option'+(o===type?" selected":"")+'>'+o+'</option>'; }).join("") +
+        '</select></div>' +
+        '<div class="mui" style="margin-bottom:16px"><input id="p-q" placeholder="Find hardware" value="'+esc(store.poolQ||"")+'"></div>' +
+        '<h4 class="shelfhead">On the shelf <span>'+pool.length+'</span></h4>' +
+        '<div class="shelf">' + (pool.length ? pool.map(function(h){
+            return '<div class="strow t-'+h.type.toLowerCase()+(h.id===store.sel?" sel":"")+'" draggable="true" data-id="'+h.id+'">' +
+                   (h.type==="Printer"?"Printer ":"")+esc(h.name)+'</div>';
+          }).join("") : '<p class="note">Every '+esc(type)+' is out at a station.</p>') + '</div>' +
+        '<button class="btn-add" id="p-hw" style="width:100%;margin-top:16px">+ Add hardware</button>' +
+        '<button class="btn-add" id="p-st" style="width:100%;margin-top:10px">+ Add station</button>' +
+      '</aside>' +
+    '</div>';
+
+  document.getElementById("p-type").onchange=function(){ store.poolType=this.value; store.sel=null; save(); paintHwSetup(); };
+  const qi=document.getElementById("p-q");
+  qi.oninput=function(){ store.poolQ=this.value; save(); paintHwSetup(); const n=document.getElementById("p-q"); n.focus(); n.setSelectionRange(n.value.length,n.value.length); };
+  document.getElementById("p-hw").onclick=function(){ addDialog(paintHwSetup); };
+  document.getElementById("p-st").onclick=function(){ addStation(paintHwSetup); };
+  wireDelete(paintHwSetup);
+
+  function place(id, target){
+    const h=recs.filter(function(x){ return x.id===id; })[0]; if(!h) return;
+    if(target==="pool"){
+      if(!h.station){ return; }
+      const was=h.station; h.station=null; save(); paintHwSetup(); toast(h.name+" returned to the shelf from Station "+was);
+    } else {
+      if(h.station===target) return;
+      h.station=target; save(); paintHwSetup(); toast(h.name+" placed at Station "+target);
+    }
+  }
+
+  Array.prototype.forEach.call(document.querySelectorAll("[data-id]"),function(el){
+    el.ondragstart=function(e){ e.dataTransfer.setData("text/plain", el.dataset.id); e.dataTransfer.effectAllowed="move"; el.classList.add("dragging"); };
+    el.ondragend=function(){ el.classList.remove("dragging"); };
+    el.onclick=function(e){
+      e.stopPropagation();
+      store.sel = (store.sel===el.dataset.id) ? null : el.dataset.id; save(); paintHwSetup();
+    };
+  });
+  Array.prototype.forEach.call(document.querySelectorAll("[data-drop]"),function(z){
+    const t = z.dataset.drop==="pool" ? "pool" : Number(z.dataset.drop);
+    z.ondragover=function(e){ e.preventDefault(); z.classList.add("over"); };
+    z.ondragleave=function(){ z.classList.remove("over"); };
+    z.ondrop=function(e){ e.preventDefault(); z.classList.remove("over"); place(e.dataTransfer.getData("text/plain"), t); };
+    z.onclick=function(){ if(store.sel){ const id=store.sel; store.sel=null; place(id, t); } };
+  });
+}
+
+function muiSelect(id,label,opts,sel){
+  return '<div class="mui"><label>'+esc(label)+'</label><select id="'+id+'">' +
+    opts.map(function(o){ return '<option'+(o===sel?" selected":"")+'>'+esc(o)+'</option>'; }).join("") + '</select></div>';
+}
+
+/* ===================== graders ===================== */
+function viewGraders(){
+  markNav("Graders");
+  view.innerHTML =
+    '<h1 class="mid">Graders</h1>' +
+    '<div class="field"><label for="q">Search Users</label><input id="q" autocomplete="off"></div>' +
+    '<div class="gtable"><div class="ghead"><span>User &uarr;</span><span>Created At</span></div><div id="rows"></div></div>';
+  const rows=document.getElementById("rows");
+  function paint(f){
+    f=(f||"").toLowerCase();
+    const list=GRADERS.filter(function(g){ return !f || g[1].toLowerCase().indexOf(f)>-1 || g[2].toLowerCase().indexOf(f)>-1; });
+    if(!list.length){ rows.innerHTML='<div class="empty">No user matches that search.</div>'; return; }
+    rows.innerHTML=list.map(function(g){
+      const ini=g[1].split(" ").map(function(w){return w[0];}).slice(0,2).join("");
+      return '<div class="grow"><button class="gpill" data-id="'+g[0]+'"><span class="ini">'+esc(ini)+'</span>' +
+             '<span><b>'+esc(g[1])+'</b><small>'+esc(g[2])+'</small></span></button>' +
+             '<div class="gdate">'+esc(g[3])+'</div></div>';
+    }).join("");
+    Array.prototype.forEach.call(rows.querySelectorAll(".gpill"),function(b){
+      b.onclick=function(){ go("#/graders/"+b.dataset.id); };
+    });
+  }
+  paint("");
+  document.getElementById("q").oninput=function(){ paint(this.value); };
+}
+
+function viewGrader(id){
+  markNav("Graders");
+  const g=GRADERS.filter(function(x){ return x[0]===id; })[0];
+  if(!g) return go("#/graders");
+  const s=skillsFor(id);
+  view.innerHTML =
+    '<h1 class="mid">'+esc(g[1])+'</h1>' +
+    '<div class="skills" id="grid"></div><div class="log" id="log"></div>';
+  const grid=document.getElementById("grid");
+  SKILLS.forEach(function(x){
+    const n=x[0], b=document.createElement("button");
+    function style(){ b.className="skill "+(s[n]?"on":"off"); b.setAttribute("aria-pressed",s[n]?"true":"false"); }
+    b.textContent=n; style();
+    b.onclick=function(){
+      s[n]=!s[n]; save(); style();
+      if(n==="Hardware"&&id===ME) toast(s[n]?"Hardware enabled — the tab is on Pending Scan":"Hardware disabled — the tab is hidden");
+    };
+    grid.appendChild(b);
+  });
+  document.getElementById("log").innerHTML=LOG.map(function(l){
+    return '<div class="item"><h3>&#9993; '+esc(l[0])+' | '+esc(g[1])+'</h3>' +
+           '<p class="bullet">&bull; '+esc(l[1])+'</p><p class="ts">'+esc(l[2])+'</p></div>';
+  }).join("");
+}
+
+/* ===================== create admin ===================== */
+function viewCreateAdmin(){
+  markNav("Create Admin");
+  const presets=["Review","Estimate Value","Scan","Process Order","Assemble","Slab","Ship Order","Hardware"];
+  view.innerHTML =
+    '<h1 class="left">Create Admin</h1>' +
+    '<div class="muitabs"><button class="muitab on">Details</button></div>' +
+    '<div class="formgrid">' +
+      '<div class="mui"><label>First name</label><input id="ca-first"></div>' +
+      '<div class="mui"><label>Last name</label><input id="ca-last"></div>' +
+      '<div class="mui"><label>Email</label><input id="ca-email" placeholder="name@arenaclub.com"></div>' +
+      '<div class="mui"><label>Username</label><input id="ca-user"></div>' +
+      muiSelect("ca-team","Team",["PL Grading","OR Review","Data","Items","Special","Recomp","Engineering"],"PL Grading") +
+      muiSelect("ca-role","Role",["Grader","Lead","Supervisor","Admin"],"Grader") +
+    '</div>' +
+    '<h2 class="sec">Starting skills</h2>' +
+    '<div class="checks">' + presets.map(function(p,i){
+      return '<label class="check"><input type="checkbox" '+(i<2?"checked":"")+'> '+esc(p)+'</label>';
+    }).join("") + '</div>' +
+    '<button class="actbtn" id="ca-go">Create admin</button>';
+  document.getElementById("ca-go").onclick=function(){
+    const n=(document.getElementById("ca-first").value+" "+document.getElementById("ca-last").value).trim();
+    toast(n ? "Created "+n+" — prototype stub" : "Add a first and last name");
+  };
+}
+
+/* ===================== home ===================== */
+function viewHome(){
+  markNav(null);
+  view.innerHTML = '<div class="home"><h2>In Progress (0)</h2></div>';
+}
+
+/* ===================== router ===================== */
+function route(){
+  const parts=location.hash.replace(/^#\/?/,"").split("/").filter(Boolean);
+  window.scrollTo(0,0);
+  if(!parts.length) return viewHome();
+  if(parts[0]==="home") return viewHome();
+  if(parts[0]==="graders") return parts[1]?viewGrader(parts[1]):viewGraders();
+  if(parts[0]==="create-admin") return viewCreateAdmin();
+  if(parts[0]==="p") return viewPage(parts[1], parts[2]);
+  return viewHome();
+}
+
+buildNav();
+window.addEventListener("hashchange",route);
+route();
+})();
+</script>
+</body>
+</html>
